@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  image       String
+  location    String
+  eventDate   DateTime
+  price       Float
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  cityId String
+  city   City   @relation(fields: [cityId], references: [id])
+
+  tickets Ticket[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("events")
+  @@index([title])
+  @@index([categoryId])
+  @@index([cityId])
+  @@index([eventDate])
+}
+
+model Category {
+  id   String @id @default(cuid())
+  name String @unique
+
+  events Event[]
+
+  createdAt DateTime @default(now())
+}
+
+model City {
+  id   String @id @default(cuid())
+  name String @unique
+
+  events  Event[]
+  tickets Ticket[]
+
+  createdAt DateTime @default(now())
+}
+
+model Buyer {
+  id    String @id @default(cuid())
+  name  String
+  email String
+  phone String
+
+  tickets Ticket[]
+
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+model Ticket {
+  id String @id @default(cuid())
+  quantity Int
+  totalPrice Float
+
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id])
+
+  buyerId String
+  buyer   Buyer  @relation(fields: [buyerId], references: [id])
+
+  cityId String
+  city   City   @relation(fields: [cityId], references: [id])
+
+  sessionId String
+
+  createdAt DateTime @default(now())
+
+  @@index([eventId])
+  @@index([cityId])
+  @@index([createdAt])
+  @@index([sessionId])
+}
